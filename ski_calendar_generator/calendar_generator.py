@@ -59,8 +59,10 @@ class CalendarGenerator:
                         except (ValueError, IndexError):
                             logger.warning(f"Could not parse time string: {time_str} for race {race['race_id']} run {run.get('number', 'unknown')}")
                     
-                    # Set timezone to UTC
-                    start_time = pytz.utc.localize(start_time)
+                    # Convert MEZ to UTC
+                    mez = pytz.timezone('Europe/Zurich')
+                    start_time = mez.localize(start_time)
+                    start_time = start_time.astimezone(pytz.UTC)
                     
                     # Create event summary with run number
                     run_number = run.get('number', 1)
