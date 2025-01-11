@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "ski-calendar-generator"
+version = "0.1.0"
+description = "pytz"
+authors = ["davidemarcoli <davide@marcoli.ch>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+icalendar = "^6.1.0"
+fastapi = "^0.115.6"
+uvicorn = "^0.34.0"
+requests = "^2.32.3"
+pytz = "^2024.2"
+APScheduler = "^3.11.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+start = "ski_calendar_generator.api:start"

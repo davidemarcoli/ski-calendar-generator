@@ -1,0 +1,1 @@
+# ski-calendar-generator
