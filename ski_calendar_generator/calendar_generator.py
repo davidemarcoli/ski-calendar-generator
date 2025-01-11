@@ -85,6 +85,7 @@ class CalendarGenerator:
                     event.add('summary', summary)
                     event.add('dtstart', start_time)
                     event.add('dtend', start_time.replace(hour=start_time.hour + 2))  # Assume 2 hours per run
+                    event.add('dtstamp', datetime.now())
                     event.add('location', f"{comp['location']}, {comp['country']}")
                     event.add('description', description)
                     
