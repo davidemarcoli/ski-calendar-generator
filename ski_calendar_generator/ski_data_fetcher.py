@@ -14,7 +14,6 @@ class SkiDataFetcher:
     
     def __init__(self):
         self.CACHE_DIR.mkdir(exist_ok=True)
-        Path("logs").mkdir(exist_ok=True)
         self.competitions_cache_file = self.CACHE_DIR / "competitions.json"
         self.details_cache_file = self.CACHE_DIR / "competition_details.json"
     

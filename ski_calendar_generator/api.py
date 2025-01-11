@@ -1,3 +1,4 @@
+from pathlib import Path
 from fastapi import FastAPI, Response, BackgroundTasks
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -6,6 +7,8 @@ from contextlib import asynccontextmanager
 
 from ski_calendar_generator.calendar_generator import CalendarGenerator
 from ski_calendar_generator.ski_data_fetcher import SkiDataFetcher
+
+Path("logs").mkdir(exist_ok=True)
 
 # Set up logging
 logging.basicConfig(
