@@ -83,11 +83,16 @@ class CalendarGenerator:
                     start_time = start_time.astimezone(pytz.UTC)
                     
                     # Create event summary with run number
-                    run_number = run.get('number', 1)
-                    summary = f"{comp['location']} - {race['discipline']} Run {run_number} ({comp['gender']})"
+                    run_number = run.get('number', 1) if len(runs) > 1 else None
+                    summary = f"{comp['location']} - {race['discipline']}"
+                    if run_number:
+                        summary += f" Run {run_number}"
+                    summary += f" ({comp['gender']})"
                     
                     # Add run status and info if available
-                    description = f"Run {run_number}\n"
+                    description = ""
+                    if run_number:
+                        description += f"Run {run_number}\n"
                     if run.get('status'):
                         description += f"Status: {run['status']}\n"
                     if run.get('info'):
