@@ -33,10 +33,10 @@ class SkiDataFetcher:
         
         return competitions
     
-    async def fetch_competition_details(self, event_id: str) -> Optional[dict]:
+    async def fetch_competition_details(self, event_id: str, force_refresh: bool = False) -> Optional[dict]:
         """Fetch details for a specific competition."""
         # First check if we have it in our cached details
-        if self.details_cache_file.exists():
+        if self.details_cache_file.exists() and not force_refresh:
             with open(self.details_cache_file, 'r') as f:
                 details_cache = json.load(f)
                 if event_id in details_cache:
@@ -70,7 +70,7 @@ class SkiDataFetcher:
         for comp in competitions:
             event_id = comp['event_id']
             
-            details = await self.fetch_competition_details(event_id)
+            details = await self.fetch_competition_details(event_id, force_refresh)
             if details:
                 details_cache[event_id] = details
             
