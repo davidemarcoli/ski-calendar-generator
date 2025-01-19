@@ -109,7 +109,7 @@ class CalendarGenerator:
                     
                     event.add('summary', summary)
                     event.add('dtstart', start_time)
-                    event.add('dtend', start_time.replace(hour=start_time.hour + 2))  # Assume 2 hours per run
+                    event.add('dtend', start_time.replace(hour=start_time.hour + 1))  # Assume 1 hours per run
                     event.add('dtstamp', now)
                     event.add('created', datetime.fromisoformat(event_state['created']))
                     event.add('last-modified', now)
