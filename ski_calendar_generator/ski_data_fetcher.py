@@ -17,14 +17,15 @@ class SkiDataFetcher:
         self.competitions_cache_file = self.CACHE_DIR / "competitions.json"
         self.details_cache_file = self.CACHE_DIR / "competition_details.json"
     
-    async def fetch_competitions(self) -> List[dict]:
+    async def fetch_competitions(self, force_refresh: bool = False) -> List[dict]:
         """Fetch list of all competitions, using cache if available."""
         logger.info("Fetching competitions list")
-        if self.competitions_cache_file.exists():
+        if self.competitions_cache_file.exists() and not force_refresh:
             with open(self.competitions_cache_file, 'r') as f:
                 return json.load(f)
-        
+
         response = requests.get(f"{self.BASE_URL}/competitions")
+        response.raise_for_status()  # Don't overwrite the cache with an error response
         competitions = response.json()
         
         # Cache the results
@@ -60,19 +61,29 @@ class SkiDataFetcher:
     async def fetch_all_details(self, force_refresh: bool = False):
         """Fetch details for all competitions with rate limiting."""
         logger.info("Starting full data refresh")
-        competitions = await self.fetch_competitions()
-        
+        # Refresh the list too, otherwise a new season's competitions are never picked up
+        competitions = await self.fetch_competitions(force_refresh)
+
         if self.details_cache_file.exists() and not force_refresh:
             logger.info("Using cached details")
             return
-        
+
+        previous_details = {}
+        if self.details_cache_file.exists():
+            with open(self.details_cache_file, 'r') as f:
+                previous_details = json.load(f)
+
         details_cache = {}
         for comp in competitions:
             event_id = comp['event_id']
-            
+
             details = await self.fetch_competition_details(event_id, force_refresh)
             if details:
                 details_cache[event_id] = details
+            elif event_id in previous_details:
+                # Keep the last known data if the API is temporarily failing
+                logger.warning(f"Failed to fetch details for event {event_id}, keeping cached data")
+                details_cache[event_id] = previous_details[event_id]
             
             # Rate limiting
             await asyncio.sleep(10)
