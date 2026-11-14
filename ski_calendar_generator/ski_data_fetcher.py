@@ -36,14 +36,13 @@ class SkiDataFetcher:
     
     async def fetch_competition_details(self, event_id: str, force_refresh: bool = False) -> Optional[dict]:
         """Fetch details for a specific competition."""
-        # First check if we have it in our cached details
-        if self.details_cache_file.exists() and not force_refresh:
+        # Always load the existing cache, so updating one event doesn't drop all others
+        details_cache = {}
+        if self.details_cache_file.exists():
             with open(self.details_cache_file, 'r') as f:
                 details_cache = json.load(f)
-                if event_id in details_cache:
-                    return details_cache[event_id]
-        else:
-            details_cache = {}
+        if event_id in details_cache and not force_refresh:
+            return details_cache[event_id]
         
         logger.info(f"Fetching details for event {event_id}")
         response = requests.get(f"{self.BASE_URL}/competitions/{event_id}")
