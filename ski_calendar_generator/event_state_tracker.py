@@ -22,11 +22,12 @@ class EventStateTracker:
             'run_number': run.get('number', 1),
             'date': race['date'],
             'time': run.get('time'),
+            'start': run.get('start'),
             'status': run.get('status'),
             'info': run.get('info'),
             'location': comp['location'],
             'discipline': race['discipline'],
-            'gender': comp['gender']
+            'gender': race['gender']
         }
         return hashlib.sha256(json.dumps(event_data, sort_keys=True).encode()).hexdigest()
     

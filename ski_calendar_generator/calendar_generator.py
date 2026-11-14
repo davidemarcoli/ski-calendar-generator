@@ -66,28 +66,31 @@ class CalendarGenerator:
                     event_state = state_tracker.get_event_state(event_uid)
                     sequence = state_tracker.update_event_state(event_uid, event_hash)
                     
-                    # Start time handling for this specific run
-                    start_time = base_start_time
-                    if run.get('time'):
-                        try:
-                            time_str = run['time']
-                            if time_str and ':' in time_str:
-                                hour, minute = map(int, time_str.split(':')[:2])
-                                start_time = start_time.replace(hour=hour, minute=minute)
-                        except (ValueError, IndexError):
-                            logger.warning(f"Could not parse time string: {time_str} for race {race['race_id']} run {run.get('number', 'unknown')}")
-                    
-                    # Convert MEZ to UTC
-                    mez = pytz.timezone('Europe/Zurich')
-                    start_time = mez.localize(start_time)
-                    start_time = start_time.astimezone(pytz.UTC)
+                    # Prefer the timezone-aware start time, run and race times are in the venue's local time
+                    if run.get('start'):
+                        start_time = datetime.fromisoformat(run['start']).astimezone(pytz.UTC)
+                    else:
+                        start_time = base_start_time
+                        if run.get('time'):
+                            try:
+                                time_str = run['time']
+                                if time_str and ':' in time_str:
+                                    hour, minute = map(int, time_str.split(':')[:2])
+                                    start_time = start_time.replace(hour=hour, minute=minute)
+                            except (ValueError, IndexError):
+                                logger.warning(f"Could not parse time string: {time_str} for race {race['race_id']} run {run.get('number', 'unknown')}")
+
+                        # Convert venue time to UTC (older API versions don't send the timezone)
+                        venue_tz = pytz.timezone(race.get('timezone') or 'Europe/Zurich')
+                        start_time = venue_tz.localize(start_time)
+                        start_time = start_time.astimezone(pytz.UTC)
                     
                     # Create event summary with run number
                     run_number = run.get('number', 1) if len(runs) > 1 else None
                     summary = f"{comp['location']} - {race['discipline']}"
                     if run_number:
                         summary += f" Run {run_number}"
-                    summary += f" ({comp['gender']})"
+                    summary += f" ({race['gender']})"
                     
                     # Add run status and info if available
                     description = ""
@@ -114,7 +117,6 @@ class CalendarGenerator:
                     event.add('created', datetime.fromisoformat(event_state['created']))
                     event.add('last-modified', now)
                     event.add('sequence', sequence)
-                    event.add('dtstamp', datetime.now())
                     event.add('location', f"{comp['location']}, {comp['country']}")
                     event.add('description', description)
                     event.add('uid', event_uid)
